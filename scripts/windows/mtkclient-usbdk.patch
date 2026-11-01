@@ -1,0 +1,18 @@
+diff --git a/mtkclient/Library/Connection/usblib.py b/mtkclient/Library/Connection/usblib.py
+index 5e84a82..46835e9 100644
+--- a/mtkclient/Library/Connection/usblib.py
++++ b/mtkclient/Library/Connection/usblib.py
+@@ -144,10 +144,9 @@ class UsbClass(DeviceClass):
+         if self.backend is not None:
+             try:
+                 self.backend.lib.libusb_set_option.argtypes = [c_void_p, c_int]
+-                # NOTE: disabled USE_USBDK option - UsbDk enumeration is broken on
+-                # this Windows build (26200); plain WinUSB/libusb0 enumeration works.
+-                # self.backend.lib.libusb_set_option(self.backend.ctx, 1)
+-                pass
++                # USE_USBDK: the BROM/preloader port is bound to Windows' usbser
++                # driver, which plain libusb cannot open; UsbDk detours it.
++                self.backend.lib.libusb_set_option(self.backend.ctx, 1)
+             except Exception:
+                 self.backend = None
+ 
