@@ -1,0 +1,30 @@
+From b11fb6a5e12fa41fb6fb83b8308b8b4a4eb5c428 Mon Sep 17 00:00:00 2001
+From: pixi3 builder <build@localhost>
+Date: Sun, 1 Nov 2026 20:14:38 +0100
+Subject: [PATCH] pixi3_8079: accelerometer direction 6 (from the stock kernel)
+
+The ttab board config uses direction 7, which maps the BMA2xx axes rotated
+by 90 degrees on this tablet: upright portrait reads as landscape. The stock
+Pixi 3 (10) kernel's cust_acc_hw has i2c_num 2, direction 6.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ arch/arm/mach-mt8127/ttab/accelerometer/cust_acc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-mt8127/ttab/accelerometer/cust_acc.c b/arch/arm/mach-mt8127/ttab/accelerometer/cust_acc.c
+index 88d72fb6..238fed8d 100644
+--- a/arch/arm/mach-mt8127/ttab/accelerometer/cust_acc.c
++++ b/arch/arm/mach-mt8127/ttab/accelerometer/cust_acc.c
+@@ -6,7 +6,7 @@
+ /*---------------------------------------------------------------------------*/
+ static struct acc_hw cust_acc_hw = {
+     .i2c_num = 2,
+-    .direction = 7,
++    .direction = 6,   /* stock pixi3 8079 value; ttab's 7 rotates the screen by 90 degrees */
+     .power_id = MT65XX_POWER_NONE,  /*!< LDO is not used */
+     .power_vol= VOL_DEFAULT,        /*!< LDO is not used */
+     .firlen = 0, //old value 16                /*!< don't enable low pass fileter */
+-- 
+2.17.1
+
