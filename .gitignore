@@ -1,0 +1,24 @@
+# --- created by scripts/windows/setup.ps1
+/.venv/
+/external/
+
+# --- your tablet's data and stock firmware: NEVER commit these
+# (backup\small holds this unit's nvram: serial, Wi-Fi/BT MACs, calibration - unique and irreplaceable)
+/backup/
+/firmware_dl/
+
+# --- build output and images (attach to a release instead of committing)
+/out/
+*.img
+*.zip
+*.bin
+*.elf
+
+# --- local state / editors
+.claude/
+*.log
+*.orig
+*.rej
+__pycache__/
+.vscode/
+.idea/
