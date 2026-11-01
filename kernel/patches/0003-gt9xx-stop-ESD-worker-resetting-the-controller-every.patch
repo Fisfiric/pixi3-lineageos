@@ -1,0 +1,52 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: pixi3 builder <build@localhost>
+Date: Sat, 31 Oct 2026 19:59:54 +0100
+Subject: [PATCH 3/3] gt9xx: stop ESD worker resetting the controller every 2.3
+ s
+
+gtp_check_fw() compared register 0x8140 against the product ID of a built-in GT912
+reference firmware that does not match this tablet controller, so every ESD cycle
+declared the IC abnormal and force-reset it (~0.4 s dead time each: dropped taps and
+swipes turned into clicks). Make the check pass (no firmware is flashed here) and
+disable per-event debug printing.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ arch/arm/mach-mt8127/ttab/touchpanel/gt9xx_driver.c    | 10 ++++++++++
+ .../arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h |  2 +-
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-mt8127/ttab/touchpanel/gt9xx_driver.c b/arch/arm/mach-mt8127/ttab/touchpanel/gt9xx_driver.c
+index 516e05fd..9a0d9f93 100644
+--- a/arch/arm/mach-mt8127/ttab/touchpanel/gt9xx_driver.c
++++ b/arch/arm/mach-mt8127/ttab/touchpanel/gt9xx_driver.c
+@@ -2876,6 +2876,16 @@ static s32 gtp_check_fw(void)
+     u8 versionBuff[4] = {0};
+     s32 ret,retry =  0;
+ 
++    /*
++     * pixi3_8079: the reference image gtp_default_FW_fl[] is for a GT912, not the
++     * controller on this tablet, so the product-ID compare below always failed and
++     * the ESD worker reset the chip every ~2.3 s (a ~0.4 s input dead-zone each
++     * time: dropped taps, swipes turned into clicks). We never flash firmware here
++     * (GTP_AUTO_UPDATE/HEADER_FW_UPDATE are 0); the 0x8040/0x8041 ESD heartbeat
++     * still guards against real hangs.
++     */
++    return 1;
++
+     while(retry++ < 3)
+     {
+         ret = i2c_read_bytes_non_dma(i2c_client_point, 0x8140, versionBuff, sizeof(versionBuff));
+diff --git a/arch/arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h b/arch/arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h
+index 59c31ffa..c6e4ff0d 100644
+--- a/arch/arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h
++++ b/arch/arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h
+@@ -137,7 +137,7 @@ extern s32 gtp_i2c_read_dbl_check(struct i2c_client *client, u16 addr, u8 *rxbuf
+ //#define TPD_HAVE_BUTTON             // report key as coordinate,Vibration feedback
+ //#define TPD_WARP_X                  // mirrored x coordinate
+ //#define TPD_WARP_Y                  // mirrored y coordinate
+-#define GTP_DEBUG_ON          1
++#define GTP_DEBUG_ON          0
+ #define GTP_DEBUG_ARRAY_ON    0
+ #define GTP_DEBUG_FUNC_ON     0
+ 

@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: pixi3 builder <build@localhost>
+Date: Fri, 30 Oct 2026 20:35:20 +0100
+Subject: [PATCH 2/3] pixi3_8079: GT9xx on I2C bus 1, never push config;
+ BQ24158 charger
+
+Stock 8079 registers gt9xx@0x5d on bus 1 (ttab uses bus 0); RST GPIO25,
+INT GPIO30, EINT 8 match ttab. Disable GTP_DRIVER_SEND_CFG so the chip
+keeps its factory config. Switch FAN5405 -> BQ24158 (stock charger);
+CV stays 4.36V/4.10V-hot like stock (verified in stock binary).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ arch/arm/configs/pixi3_8079_defconfig                   | 4 ++--
+ arch/arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/configs/pixi3_8079_defconfig b/arch/arm/configs/pixi3_8079_defconfig
+index d9232d18..7518b7cb 100644
+--- a/arch/arm/configs/pixi3_8079_defconfig
++++ b/arch/arm/configs/pixi3_8079_defconfig
+@@ -1357,9 +1357,9 @@ CONFIG_MTK_PMIC_WRAP=y
+ # CONFIG_MTK_BQ24250_SUPPORT is not set
+ # CONFIG_MTK_BQ24261_SUPPORT is not set
+ # CONFIG_MTK_BQ24196_SUPPORT is not set
+-CONFIG_MTK_FAN5405_SUPPORT=y
++# CONFIG_MTK_FAN5405_SUPPORT is not set
+ # CONFIG_MTK_FAN5402_SUPPORT is not set
+-# CONFIG_MTK_BQ24158_SUPPORT is not set
++CONFIG_MTK_BQ24158_SUPPORT=y
+ # CONFIG_MTK_BQ24296_SUPPORT is not set
+ # CONFIG_MTK_BQ27541_SUPPORT is not set
+ # CONFIG_MTK_NCP1851_SUPPORT is not set
+diff --git a/arch/arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h b/arch/arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h
+index d9e63364..59c31ffa 100644
+--- a/arch/arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h
++++ b/arch/arm/mach-mt8127/ttab/touchpanel/tpd_custom_gt9xx.h
+@@ -112,7 +112,7 @@ extern s32 gtp_i2c_read_dbl_check(struct i2c_client *client, u16 addr, u8 *rxbuf
+ 
+ //***************************PART1:ON/OFF define*******************************
+ #define GTP_CUSTOM_CFG        0
+-#define GTP_DRIVER_SEND_CFG   1       // driver send config to TP in intilization
++#define GTP_DRIVER_SEND_CFG   0       // pixi3_8079: keep the panel's factory config in the chip, never overwrite it
+ #define GTP_HAVE_TOUCH_KEY    0
+ #define GTP_POWER_CTRL_SLEEP  0       // turn off/on power on suspend/resume
+ 
+@@ -348,7 +348,7 @@ typedef enum
+ #define TRIGGER_LOC                 8
+ 
+ #define I2C_MASTER_CLOCK                300
+-#define I2C_BUS_NUMBER                  0     // I2C Bus for TP, mt6572
++#define I2C_BUS_NUMBER                  1     // pixi3_8079: GT9xx is on I2C bus 1 (stock)
+ #define GTP_DMA_MAX_TRANSACTION_LENGTH  255   // for DMA mode
+ #define GTP_DMA_MAX_I2C_TRANSFER_SIZE   (GTP_DMA_MAX_TRANSACTION_LENGTH - GTP_ADDR_LENGTH)
+ #define MAX_TRANSACTION_LENGTH          8
